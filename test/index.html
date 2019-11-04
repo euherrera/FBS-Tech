@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>Socket.io</title>
+        <style>
+        #content{
+          display:flex;
+          justify-content: space-between;
+          background: #f2f2f2;
+        }
+        .item{
+          display:flex;
+          flex-flow: column;
+          justify-content: space-between;
+        }
+
+        .itemId{
+          width:30%;
+          padding: 10% 20%;
+        }
+        .stateButton{
+          padding:8px 20px;
+          background: transparent;
+          color: black;
+        }
+
+        ul, li{
+          list-style:none;
+        }
+        </style>
+    </head>
+ 
+    <body>
+        <h1>Communicating with socket.io!</h1>
+
+        <p><input type="button" value="Poke the server" id="poke" /></p>
+        <div id='content'>
+          <div id='itemId'>
+            
+          </div>
+          <div id='name'>
+            
+          </div>
+          <div id='price'>
+            
+          </div>
+
+          <div id='state'>
+            
+          </div>
+
+          
+        </div>
+         
+
+        <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+        <script src="/socket.io/socket.io.js"></script>
+        <script>
+
+            
+            var socket = io.connect('http://localhost:8080');
+
+            // The visitor is asked for their username...
+            var username = prompt('What\'s your username?');
+
+            socket.on('fetch', data => {
+              console.log(data.selections);
+              socket.emit('fetch', data);
+              let selectionData = data.selections;
+              let empyId = [];
+              let empyName = [];
+              let empyPrice = [];
+              let empyState = [];
+              let empyButt = [];
+              let butt = $('<button type="button" id="stateButton">State change</button>');
+              selectionData.forEach(element => {
+
+                empyId.push(element.id)
+                empyName.push(element.name)
+                empyPrice.push(element.price)
+                empyState.push(element.active)
+                
+
+                
+              });
+
+              var newArr = empyId.map(function(val, index){ 
+                  return {key:index, value:val}; 
+              }) 
+              $('#itemId').html(newArr)
+
+              var newArr2 = empyName.map(function(val, index){ 
+                  return {key:index, value:val}; 
+              }) 
+              $('#name').html(newArr2)
+
+              var newArr3 = empyPrice.map(function(val, index){ 
+                  return {key:index, value:val}; 
+              }) 
+              $('#price').html(newArr3)
+
+              var newArr4 = empyState.map(function(val, index){ 
+                  return {key:index, value:val}; 
+              }) 
+              $('#state').html(newArr4)
+
+              var newArr5 = empyButt.map(function(val, index){ 
+                  return {key:index, value:val}; 
+              }) 
+              $('#butState').html(newArr5)
+
+              empyId.forEach(i => {
+                $('#itemId').append('<ul class="item"> <li>' + i + '</li></ul>');
+              })
+
+              empyName.forEach(n => {
+                $('#name').append('<ul class="item"> <li>' + n + '</li></ul>');
+              })
+
+              empyPrice.forEach(p => {
+                $('#price').append('<ul class="item"> <li>' + p + '</li></ul>');
+              })
+              
+              empyState.forEach(s => {
+                $('#state').append('<ul class="item"> <li>' + s + '  <button class="stateButton" type="button">state change</button></li></ul>');
+                var button4State = $('.stateButton');
+                if (s === false) {
+                  button4State.css('background', 'lightgrey !important') 
+                }else {
+                button4State.css('background', '#deffde');
+                }
+                
+              })   
+              
+            });
+
+            // It's sent with the signal "little_newbie" (to differentiate it from "message")
+            socket.emit('little_newbie', username);
+
+            // A dialog box is displayed when the server sends us a "message"
+            socket.on('message', function(message) {
+                alert('The server has a message for you: ' + message);
+            })
+
+            // When the button is clicked, a "message" is sent to the server
+            $('#poke').click(function () {
+                socket.emit('message', data);
+            })
+        </script>
+       
+    </body>
+</html>
